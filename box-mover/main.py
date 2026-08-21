@@ -15,6 +15,7 @@ bg=pygame.image.load("assets/images/bg.png")
 
 logo=pygame.image.load("assets/images/jpj-inc.png")
 logo_alpha=0
+fade_out=False
 
 screen_number=-1
 
@@ -29,15 +30,25 @@ def draw():
     3:game
     4:win/lose
     """
-    global logo_alpha
+    global logo_alpha,screen_number
     if screen_number==-1:
         screen.fill("white")
 
-        if run_time>=1:
+        if run_time>=6
+        if run_time>=4:
+            if logo_alpha>0:
+                logo_alpha-=4
+            elif logo_alpha<=0:
+                logo_alpha=0
+
+                #Change screen after fade
+                screen_number=0
+        elif run_time>=1:
             if logo_alpha<255:
                 logo_alpha+=2
             elif logo_alpha>=255:
                 logo_alpha=255
+                fade_out=True
 
         copy_logo=logo.copy()
         copy_logo.set_alpha(logo_alpha)
@@ -47,7 +58,8 @@ def draw():
 
 
     elif screen_number==0:
-        screen.fill("white")
+        screen.fill("gray")
+        pygame.display.flip()
     elif screen_number==1:
         screen.fill("black")
         screen.blit(bg)
