@@ -6,18 +6,23 @@ screen_width=690
 pygame.init()
 screen=pygame.display.set_mode((screen_width,screen_hight))
 pygame.display.set_caption("Box Mover")
+#^ is pygame setup
 
+#Clock/time setup
 clock=pygame.time.Clock()
 seconds_counter=0
 run_time=0
 
+#-- Image loading
 bg=pygame.image.load("assets/images/bg.png")
 
+#For the logo
 logo=pygame.image.load("assets/images/jpj-inc.png")
 logo_alpha=0
 fade_out=False
 fade_time_passed=0
 
+#Displayes diffrent levels/menus based on number
 screen_number=-1
 
 def draw():
@@ -32,6 +37,8 @@ def draw():
     4:win/lose
     """
     global logo_alpha,screen_number,fade_out,fade_time_passed
+
+    #Fades the logo into the title
     if screen_number==-1:
         screen.fill("white")
 
@@ -62,15 +69,18 @@ def draw():
 
         pygame.display.flip()
 
-
+    #Main title
     elif screen_number==0:
         screen.fill("gray")
         pygame.display.flip()
+
     elif screen_number==1:
         screen.fill("black")
         screen.blit(bg)
         pygame.display.flip()
 
+def logic():
+    pass
 
 def do_time():
     """
@@ -95,6 +105,7 @@ while running:
             running=False
 
     draw()
+    logic()
 
     do_time()
 pygame.quit()
