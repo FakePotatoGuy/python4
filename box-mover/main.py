@@ -16,6 +16,15 @@ run_time=0
 #-- Image loading
 bg=pygame.image.load("assets/images/bg.png")
 
+title_bg=pygame.image.load("assets/images/title-bg.png")
+
+play_button=pygame.image.load("assets/images/play_button.png")
+play_button_pressed=pygame.image.load("assets/images/play_button.png")
+current_play_button=play_button
+main_menu_fade=0
+main_menu_ready=False
+
+
 #For the logo
 logo=pygame.image.load("assets/images/jpj-inc.png")
 logo_alpha=0
@@ -37,6 +46,7 @@ def draw():
     4:win/lose
     """
     global logo_alpha,screen_number,fade_out,fade_time_passed
+    global main_menu_ready,main_menu_fade,main_menu_fade_time
 
     #Fades the logo into the title
     if screen_number==-1:
@@ -71,7 +81,25 @@ def draw():
 
     #Main title
     elif screen_number==0:
-        screen.fill("gray")
+
+        if not main_menu_ready:
+                if main_menu_fade<255:
+                    main_menu_fade+=2
+                elif main_menu_fade>=255:
+                    main_menu_fade=255
+                    main_menu_ready=True
+        
+        screen.fill("white")
+        #Name of the game
+        current_play_button2=title_bg.copy()
+        current_play_button2.set_alpha(main_menu_fade)
+        screen.blit(current_play_button2,(0,0))
+
+        #Play button
+        current_play_button2=current_play_button.copy()
+        current_play_button2.set_alpha(main_menu_fade)
+        screen.blit(current_play_button2,(screen_width//2-150,350))
+
         pygame.display.flip()
 
     elif screen_number==1:
