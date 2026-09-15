@@ -1,18 +1,16 @@
-import pygame
+depth=6
+first_paces=40
+first_landmark="tree"
+first_degree=20
+second_paces=30
+second_degree=40
+third_paces=60
+second_landmark="rock"
 
-screen_width=500
-screen_height=600
 
-pygame.init()
-screen=pygame.display.set_mode(())
-pygame.display.set_caption("swift'n'simple")
-clock=pygame.time.Clock()
-
-running=True
-while running:
-    for event in pygame.event.get():
-        if event.type==pygame.QUIT:
-            running=False
-
-    clock.tick(60)
-pygame.quit()
+print(f"Walk {first_paces} paces towards {first_landmark}")
+print(f"Turn left {first_degree}")
+print(f"Walk {second_paces} paces")
+print(f"Turn right {second_degree} degrees")
+print(f"Walk {third_paces} paces towards {second_landmark}")
+print(f"Dig {depth} feet deep")

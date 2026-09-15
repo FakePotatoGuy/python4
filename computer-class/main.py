@@ -1,168 +1,177 @@
-import random
+import pygame,random
 
-#This ceates a matrix in order to hold the information and location of things on a screen
-grid=[]
+screen_width=800
+screen_height=600
 
-#This sets up rows and collums for the grid
-width=40
-height=20
-for y in range(height):
-    row=[]
-    for x in range(width):
-            row.append(0)
-    grid.append(row)
+pygame.init()
+screen=pygame.display.set_mode((screen_width,screen_height))
+pygame.display.set_caption("Pew Pew Game")
+clock=pygame.time.Clock()
+
+
+time=0
+player=pygame.Rect(10,0,25,15)
+
+player2=pygame.Rect(10,50,25,15)
+ready_player2=False
+
+bullets=[]
+
+class bullet:
+    def __init__(self,x,y):
+        self.type="normal"
+        self.x=x
+        self.y=y
+        self.color=(225,225,225)
+        self.rect=pygame.Rect(x,y,15,10)
+
+class big_bullet:
+     def __init__(self,x,y):
+             self.type="big"
+             self.x=x
+             self.y=y
+             self.time=0
+             self.color=(225,225,225)
+             self.rect=pygame.Rect(x,y,15,75)
+
+enemys=[]
+class enemy:
+    def __init__(self,x,y):
+            self.x=x
+            self.y=y
+            self.rect=pygame.Rect(x,y,35,20)
+
+def draw():
+    screen.fill("black")
     
-playerx=width//2
-playery=height//2
-grid[playery][playerx]=1
 
-def main_loop():
-    """
-    This is the main game loop
-    """
-    running=True
-    while running:
-        display_grid()
-        movement()
-    
+    for bullet in bullets:
+        pygame.draw.rect(screen,bullet.color,bullet.rect)
+
+    for enemy in enemys:
+        pygame.draw.rect(screen,("red"),enemy.rect)
+
+    pygame.draw.rect(screen,("white"),player)
+    if ready_player2:
+        pygame.draw.rect(screen,("green"),player2)
+
+    pygame.display.flip()
+
 def movement():
-    """
-    Takes the inputs (W,A,S,D)
-    and translates to movement
+    key=pygame.key.get_pressed()
     
-    this also clears the old player
-    location replacing it with a new one
-    """
-    global playerx,playery
-    grid[playery][playerx]=0
-    guess=input()
-    if guess=="w" or guess=="W":
-        if playery>0:
-            if not grid[playery-1][playerx]==2:
-                if grid[playery-1][playerx]==3:
-                    death()
+
+    if ready_player2:
+        if key[pygame.K_s]:
+            player.y+=6
+        elif key[pygame.K_w]:
+            player.y-=6
+        if key[pygame.K_DOWN]:
+            player2.y+=6
+        elif key[pygame.K_UP]:
+            player2.y-=6
+    else:
+        if key[pygame.K_s]:
+            player.y+=6
+        elif key[pygame.K_w]:
+            player.y-=6
+        elif key[pygame.K_DOWN]:
+            player.y+=6
+        elif key[pygame.K_UP]:
+            player.y-=6
+
+def logic():
+    global time
+    for bullet_index,bullet in enumerate(bullets):
+            destroy_bullet=False
+            if bullet.type=="big":
+                bullet.rect.x+=3
+                r, g, b = bullet.color
+                bullet.color = (max(0, r - 5), max(0, g - 5), max(0, b - 5))
+                if bullet.color==(0,0,0):
+                    destroy_bullet=True
+            else:
+                bullet.rect.x+=8
+                r, g, b = bullet.color
+                bullet.color = (max(0, r - 2), max(0, g - 2), max(0, b - 2))
+                if bullet.color==(0,0,0):
+                    destroy_bullet=True
+            if bullet.rect.right>screen_width:
+                destroy_bullet=True
+
+            hit_index = bullet.rect.collidelist(enemys)
+            if hit_index != -1:
+                enemys.pop(hit_index)
+                destroy_bullet=True
+
+            if destroy_bullet:
+                bullets.pop(bullet_index)
+
+    if player.top<=0:
+        player.top=0
+    if player.bottom>=screen_height:
+            player.bottom=screen_height
+
+    if ready_player2:
+        if player2.top<=0:
+            player2.top=0
+        if player2.bottom>=screen_height:
+            player2.bottom=screen_height
+
+    time+=1
+    if time>=60:
+        time=0
+        enemys.append(enemy(screen_width,random.randrange(0,screen_height)))
+        if ready_player2:
+            enemys.append(enemy(screen_width,random.randrange(0,screen_height)))
+
+    for enemy_thing in enemys:
+        enemy_thing.rect.x-=3
+
+    
+
+running=True
+while running:
+    for event in pygame.event.get():
+        if event.type==pygame.QUIT:
+            running=False
+        if event.type==pygame.KEYDOWN:
+            if event.key==pygame.K_BACKSLASH:
+                if ready_player2:
+                    ready_player2=False
                 else:
-                    playery-=1
-    elif guess=="s" or guess=="S":
-        if playery<height-1:
-            if not grid[playery+1][playerx]==2:
-                if grid[playery+1][playerx]==3:
-                    death()
-                else:
-                    playery+=1
-    elif guess=="a" or guess=="A":
-        if playerx>0:
-            if not grid[playery][playerx-1]==2:
-                if grid[playery][playerx-1]==3:
-                    death()
-                else:
-                    playerx-=1
-    elif guess=="d" or guess=="D":
-        if playerx<width-1:
-            if not grid[playery][playerx+1]==2:
-                if grid[playery][playerx+1]==3:
-                    death()
-                else:
-                    playerx+=1
+                    ready_player2=True
             
-    grid[playery][playerx]=1
-        
-def display_grid():
-    """
-    Basicaly just prints out the grid row
-    by row to show the screen
-    """
-    print("\n\n\n\n\n\n\n\n\n\n\n"*3)
-    print(" "+"_"*width)
-    for thing in grid:
-        line="("
-        for thingy in thing:
-            if thingy==0:
-                line+=" "
-            elif thingy==1:
-                line+="@"
-            elif thingy==2:
-                line+="#"
-            elif thingy==3:
-                line+="^"
-            #line+=str(thingy)
-        print(line+")")
-    print(" "+"_"*width)
-    #print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+            if event.key==pygame.K_SPACE:
+                bullets.append(bullet(player.x,player.y))
 
-def make_terrain():
-    global grid
-    #Adds some spikes
-    
-    #Draws the walls
-    for i in range(6):
-        wally=random.randrange(0,height-1)
-        wallx=random.randrange(0,width-1)
-        
-        for i in range(23):
-            if not grid[wally][wallx]==1:
-                grid[wally][wallx]=2
+            if event.key==pygame.K_q:
+                new_bullet=big_bullet(player.x,player.y)
+                new_bullet.rect.center=player.center
+                new_bullet.rect.left=player.right
+                bullets.append(new_bullet)
+
+            #Add p2 controls
+            if ready_player2:
+                if event.key==pygame.K_RIGHT:
+                    new_bullet=bullet(player2.x,player2.y)
+                    new_bullet.color=(0,225,0)
+                    bullets.append(new_bullet)
                 
-            num=random.randrange(1,5)
-            if num==1:
-                if not wally+1>height-1:
-                    wally+=1
-            elif num==2:
-                if not wally-1<0:
-                    wally-=1
-            elif num==3:
-                if not wallx+1>width-1:
-                    wallx+=1
-            elif num==4:
-                if not wallx-1<0:
-                    wallx-=1
-              
-    for i in range(8):  
-        num1=random.randrange(0,height-1)
-        num2=random.randrange(0,width-1)
-        if not grid[num1][num2]==1 or not grid[num1][num2]==2:
-            grid[num1][num2]=3
-                    
-def start():
-    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"*3)
-    
-    print("""
-    ---------------------------------------
-    MRS TAYLORS DUNGEON OF DOOM AND DESPAIR
-    ---------------------------------------
-          -Press any button to start-
-    """)
-    input()
-  
-def death():
-    global grid,playerx,playery
-    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"*3)
-    print("""
-    ---------------------------------------
-                   YOU DIED
-    ---------------------------------------
-          -Press any button to start-
-    """)
-    #print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-    #print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-    input()
-    
-    #This ceates a matrix in order to hold the information and location of things on a screen
-    grid=[]
-    
-    #This sets up rows and collums for the grid
-    for y in range(height):
-        row=[]
-        for x in range(width):
-                row.append(0)
-        grid.append(row)
-        
-    playerx=width//2
-    playery=height//2
-    grid[playery][playerx]=1
-    make_terrain()
-    
-start()
-make_terrain()
+                if event.key==pygame.K_LEFT:
+                    new_bullet=big_bullet(player2.x,player2.y)
+                    new_bullet.rect.center=player2.center
+                    new_bullet.rect.left=player2.right
+                    new_bullet.color=(0,225,0)
+                    bullets.append(new_bullet)
 
-main_loop()
+        #Clicks
+        if event.type==pygame.MOUSEBUTTONDOWN:
+            bullets.append(bullet(player.x,player.y))
+
+    draw()
+    movement()
+    logic()
+
+    clock.tick(60)
+pygame.quit()
