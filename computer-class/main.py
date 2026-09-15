@@ -8,6 +8,10 @@ screen=pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption("Pew Pew Game")
 clock=pygame.time.Clock()
 
+maxhp=10
+health=10
+font = pygame.font.SysFont("couriernew", 32)
+
 
 time=0
 player=pygame.Rect(10,0,25,15)
@@ -55,6 +59,11 @@ def draw():
     if ready_player2:
         pygame.draw.rect(screen,("green"),player2)
 
+    text_surface = font.render(f"HEALTH: {health}/{maxhp}", False, (255, 255, 255))
+    text_rect = text_surface.get_rect()
+    text_rect.right=screen_width
+    screen.blit(text_surface, text_rect)
+
     pygame.display.flip()
 
 def movement():
@@ -81,7 +90,7 @@ def movement():
             player.y-=6
 
 def logic():
-    global time
+    global time,health
     for bullet_index,bullet in enumerate(bullets):
             destroy_bullet=False
             if bullet.type=="big":
@@ -125,8 +134,12 @@ def logic():
         if ready_player2:
             enemys.append(enemy(screen_width,random.randrange(0,screen_height)))
 
-    for enemy_thing in enemys:
+    for index,enemy_thing in enumerate(enemys):
         enemy_thing.rect.x-=3
+        if enemy_thing.rect.right<0:
+            health-=1
+            enemys.pop(index)
+
 
     
 
@@ -139,8 +152,14 @@ while running:
             if event.key==pygame.K_BACKSLASH:
                 if ready_player2:
                     ready_player2=False
+                    enemys=[]
+                    health=10
+                    maxhp=10
                 else:
                     ready_player2=True
+                    enemys=[]
+                    health=20
+                    maxhp=20
             
             if event.key==pygame.K_SPACE:
                 bullets.append(bullet(player.x,player.y))
